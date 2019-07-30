@@ -1,0 +1,7 @@
+.myImages {
+  width: 90%;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between
+}
