@@ -13,7 +13,8 @@ import {
   InputGroupAddon,
   InputGroupText,
   Row,
-  Button
+  Button,
+  Spinner
 } from 'reactstrap'
 
 import './Signin.css'
@@ -23,7 +24,8 @@ class Signin extends Component {
   state = {
     email: '',
     password: '',
-    errorMessage: ''
+    errorMessage: '',
+    loading: false
   }
 
   componentWillMount() {
@@ -45,75 +47,85 @@ class Signin extends Component {
 
   signin() {
     const { email, password } = this.state
+    this.setState({loading: true})
     firebase.auth().signInWithEmailAndPassword(email, password)
-      .catch(err => this.setState({ errorMessage: err.message }))
+      .then(() => this.setState({loading: false}))
+      .catch(err => this.setState({ errorMessage: err.message, loading: false }))
   }
 
   render() {
-    return (
-      <div className="signinContainer">
-        <div className="app flex-row align-items-center">
-          <Container>
-            <Row className="justify-content-center">
-              <Col md="8">
-                <CardGroup>
-                  <Card className="p-4">
-                    <CardBody>
-                      <Form>
-                        <h1>Login</h1>
-                        <p className="text-muted">Sign In to your account</p>
-                        <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText>
-                              <i className="fas fa-user"></i>
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="text"
-                            name="email"
-                            onChange={(event) => this.handleChange(event)}
-                            placeholder="Username"
-                            autoComplete="username" />
-                        </InputGroup>
-                        <InputGroup className="mb-4">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText>
-                              <i className="fas fa-key"></i>
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="password"
-                            name="password"
-                            onChange={(event) => this.handleChange(event)}
-                            placeholder="Password"
-                            autoComplete="current-password" />
-                        </InputGroup>
-                        <Row>
-                          <Col xs="6">
-                            <Button onClick={() => this.signin()} color="primary" className="px-4">Login</Button>
-                          </Col>
-                        </Row>
-                        <p style={{ color: 'red', marginTop: '10px' }} className="text-muted-red">{this.state.errorMessage && this.state.errorMessage}</p>
-                      </Form>
-                    </CardBody>
-                  </Card>
-                  <Card className="text-white bg-primary py-5 d-md-down-none" style={{ width: '44%' }}>
-                    <CardBody className="text-center">
-                      <div>
-                        <h2>Sign up</h2>
-                        <Link to="/signup">
-                          <Button color="primary" className="mt-3" active tabIndex={-1}>Register Now!</Button>
-                        </Link>
-                      </div>
-                    </CardBody>
-                  </Card>
-                </CardGroup>
-              </Col>
-            </Row>
-          </Container>
+    const {loading} = this.state
+    let spinner = <Spinner style={{ width: '100px', height: '100px', marginTop: '10%' }} />
+
+
+    if (loading) {
+      return spinner
+    } else {
+      return (
+        <div className="signinContainer">
+          <div className="app flex-row align-items-center">
+            <Container>
+              <Row className="justify-content-center">
+                <Col md="8">
+                  <CardGroup>
+                    <Card className="p-4">
+                      <CardBody>
+                        <Form>
+                          <h1>Login</h1>
+                          <p className="text-muted">Sign In to your account</p>
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText>
+                                <i className="fas fa-user"></i>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              name="email"
+                              onChange={(event) => this.handleChange(event)}
+                              placeholder="Username"
+                              autoComplete="username" />
+                          </InputGroup>
+                          <InputGroup className="mb-4">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText>
+                                <i className="fas fa-key"></i>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="password"
+                              name="password"
+                              onChange={(event) => this.handleChange(event)}
+                              placeholder="Password"
+                              autoComplete="current-password" />
+                          </InputGroup>
+                          <Row>
+                            <Col xs="6">
+                              <Button onClick={() => this.signin()} color="primary" className="px-4">Login</Button>
+                            </Col>
+                          </Row>
+                          <p style={{ color: 'red', marginTop: '10px' }} className="text-muted-red">{this.state.errorMessage && this.state.errorMessage}</p>
+                        </Form>
+                      </CardBody>
+                    </Card>
+                    <Card className="text-white bg-primary py-5 d-md-down-none" style={{ width: '44%' }}>
+                      <CardBody className="text-center">
+                        <div>
+                          <h2>Sign up</h2>
+                          <Link to="/signup">
+                            <Button color="primary" className="mt-3" active tabIndex={-1}>Register Now!</Button>
+                          </Link>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  </CardGroup>
+                </Col>
+              </Row>
+            </Container>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 }
 

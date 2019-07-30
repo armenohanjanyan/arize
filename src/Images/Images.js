@@ -6,6 +6,7 @@ import { Button,
   ModalBody,
   ModalFooter, 
   Input, 
+  Spinner, 
   FormGroup } from 'reactstrap';
 
   import './Images.css'
@@ -23,13 +24,14 @@ class Images extends Component {
 
   state = {
     image: '',
-    images: null
+    images: null,
+    loading: false
   }
 
   toggle() {
       this.setState(prevState => ({
         modal: !prevState.modal,
-      }));
+    }));
   }
 
   toggleClose() {
@@ -48,13 +50,14 @@ class Images extends Component {
   
   addImage () {
     if (this.state.image) {
+      this.setState({loading: true})
       firebase.storage().ref('images/' + this.state.image.name).put(this.state.image)
       .on('state_changed',
       (snapshot) => {
 
       },
       (error) => {
-
+          this.setState({loading: false})
       },
       () => {
         firebase.storage().ref('images').child(this.state.image.name).getDownloadURL()
@@ -66,7 +69,8 @@ class Images extends Component {
           })
           .then(() => this.setState({
             modal: !this.state.modal,
-            image: ''
+            image: '',
+            loading: false
           }))
       }
     )
@@ -79,8 +83,13 @@ class Images extends Component {
   }
 
   render() {
-    const {images} = this.state
-    return (
+    const {images, loading} = this.state
+
+    let spinner = <Spinner style={{ width: '3rem', height: '3rem' }} />
+    if (loading) {
+      return spinner
+    } else {
+      return (
         <div className="imagesContainer">
           <div className="buttons">
             <Button onClick={() => this.toggle()} color="primary">Add Image</Button>
@@ -104,6 +113,7 @@ class Images extends Component {
         </Modal>
       </div>
     );
+    }
   }
 }
 

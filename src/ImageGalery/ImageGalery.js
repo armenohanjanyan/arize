@@ -1,9 +1,20 @@
 import React, { Component } from 'react';
 import firebase from 'firebase'
-import './ImageGalery.css'
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Input, Label, Form, FormGroup } from 'reactstrap';
+import {
+  Button, 
+  Modal, 
+  ModalHeader, 
+  ModalBody, 
+  ModalFooter, 
+  Input, 
+  Label, 
+  Form, 
+  FormGroup ,
+  Spinner
+} from 'reactstrap';
 import Images from '../Images/Images';
 
+import './ImageGalery.css'
 
 
 class ImageGalery extends Component {
@@ -13,7 +24,8 @@ class ImageGalery extends Component {
     email: '',
     phone: '',
     modal: false,
-    errorMessage: ''
+    errorMessage: '',
+    loading: false
   }
 
   componentWillMount() {
@@ -59,10 +71,11 @@ class ImageGalery extends Component {
 
   editUserData() {
     const { name, email, phone, uid } = this.state
+    this.setState({loading: true})
     let user = firebase.auth().currentUser
     user.updateEmail(email).then(() => {
     }).catch((error) => {
-      this.setState({ errorMessage: error.message })
+      this.setState({ errorMessage: error.message, loading: false })
     })
     .then(() => {
       user.updateProfile({
@@ -86,64 +99,71 @@ class ImageGalery extends Component {
         })
       }
     })
+    .then(() => this.setState({loading: false}))
   }
 
   render() {
-    return (
-      <div className="container">
-        <div className="header">
-          <div className="userInfo">
-            <div onClick={() => this.toggle()} className="editButton">
-              Edit User profile
+    const {loading} = this.state
+    let spinner = <Spinner style={{ width: '100px', height: '100px', marginTop: '10%' }} />
+    if (loading) {
+      return spinner
+    } else {
+      return (
+        <div className="container">
+          <div className="header">
+            <div className="userInfo">
+              <div onClick={() => this.toggle()} className="editButton">
+                Edit User profile
+               </div>
+            </div>
+            <div onClick={() => this.logout()} className="logout">
+              Log out
              </div>
           </div>
-          <div onClick={() => this.logout()} className="logout">
-            Log out
-           </div>
+          <div className="imHeader">Add images to galery</div>
+          <Images />
+          <Modal isOpen={this.state.modal} toggle={() => this.toggle()} className={this.props.className} backdrop={this.state.backdrop}>
+            <ModalHeader toggle={() => this.toggle()}>
+              User Info
+              <div>ID: {this.state.uid && this.state.uid}</div>
+            </ModalHeader>
+            <ModalBody>
+              <Form>
+                <FormGroup>
+                  <Label for="email">Email</Label>
+                  <Input
+                    value={this.state.email}
+                    onChange={(e) => this.setState({ email: e.target.value, errorMessage: '' })}
+                    bsSize="sm"
+                    name="email" />
+                </FormGroup>
+                <FormGroup>
+                  <Label for="name">Name</Label>
+                  <Input
+                    bsSize="sm"
+                    value={this.state.name}
+                    onChange={(e) => this.setState({ name: e.target.value })}
+                    name="name" />
+                </FormGroup>
+                <FormGroup>
+                  <Label for="examphoneplePassword">Phone number</Label>
+                  <Input
+                    value={this.state.phone}
+                    onChange={(e) => this.setState({ phone: e.target.value })}
+                    bsSize="sm"
+                    name="phone" />
+                </FormGroup>
+              </Form>
+              <p style={{ color: 'red', marginTop: '10px' }} className="text-muted-red">{this.state.errorMessage && this.state.errorMessage}</p>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="primary" onClick={() => this.editUserData()}>Save</Button>{' '}
+              <Button color="secondary" onClick={() => this.toggle()}>Cancel</Button>
+            </ModalFooter>
+          </Modal>
         </div>
-        <div className="imHeader">Add images to galery</div>
-        <Images />
-        <Modal isOpen={this.state.modal} toggle={() => this.toggle()} className={this.props.className} backdrop={this.state.backdrop}>
-          <ModalHeader toggle={() => this.toggle()}>
-            User Info
-            <div>ID: {this.state.uid && this.state.uid}</div>
-          </ModalHeader>
-          <ModalBody>
-            <Form>
-              <FormGroup>
-                <Label for="email">Email</Label>
-                <Input
-                  value={this.state.email}
-                  onChange={(e) => this.setState({ email: e.target.value, errorMessage: '' })}
-                  bsSize="sm"
-                  name="email" />
-              </FormGroup>
-              <FormGroup>
-                <Label for="name">Name</Label>
-                <Input
-                  bsSize="sm"
-                  value={this.state.name}
-                  onChange={(e) => this.setState({ name: e.target.value })}
-                  name="name" />
-              </FormGroup>
-              <FormGroup>
-                <Label for="examphoneplePassword">Phone number</Label>
-                <Input
-                  value={this.state.phone}
-                  onChange={(e) => this.setState({ phone: e.target.value })}
-                  bsSize="sm"
-                  name="phone" />
-              </FormGroup>
-            </Form>
-            <p style={{ color: 'red', marginTop: '10px' }} className="text-muted-red">{this.state.errorMessage && this.state.errorMessage}</p>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="primary" onClick={() => this.editUserData()}>Save</Button>{' '}
-            <Button color="secondary" onClick={() => this.toggle()}>Cancel</Button>
-          </ModalFooter>
-        </Modal>
-      </div>
-    );
+      );
+    }
   }
 }
 

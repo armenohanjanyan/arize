@@ -12,7 +12,8 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupText,
-  Row
+  Row,
+  Spinner
 } from 'reactstrap'
 
 import './Signup.css'
@@ -24,7 +25,8 @@ class Signup extends Component {
     password: '',
     name: '',
     phone: '',
-    errorMessage: ''
+    errorMessage: '',
+    loading: false
   }
 
   componentWillMount() {
@@ -46,6 +48,7 @@ class Signup extends Component {
 
   createUser() {
     const { email, password, name, phone } = this.state
+    this.setState({loading: true})
     let response
     firebase.auth().createUserWithEmailAndPassword(email, password)
       .then((res) => {
@@ -63,85 +66,92 @@ class Signup extends Component {
         name: name,
         uid: response.uid
       }))
-      .catch(err => this.setState({ errorMessage: err.message }))
+      .then(() => this.setState({loading: false}))
+      .catch(err => this.setState({ errorMessage: err.message, loading: false }))
   }
 
   render() {
-    return (
-      <div className="signupContainer">
-        <div className="app flex-row align-items-center">
-          <Container>
-            <Row className="justify-content-center">
-              <Col md="9" lg="7" xl="6">
-                <Card className="mx-4">
-                  <CardBody className="p-4">
-                    <Form>
-                      <h1>Register</h1>
-                      <p className="text-muted">Create your account</p>
-                      <InputGroup className="mb-3">
-                        <InputGroupAddon addonType="prepend">
-                          <InputGroupText>
-                            <i className="fas fa-user"></i>
-                          </InputGroupText>
-                        </InputGroupAddon>
-                        <Input
-                          name="name"
-                          onChange={(event) => this.handleChange(event)}
-                          type="text"
-                          placeholder="Username"
-                          autoComplete="username" />
-                      </InputGroup>
-                      <InputGroup className="mb-3">
-                        <InputGroupAddon addonType="prepend">
-                          <InputGroupText><i className="fas fa-envelope-square"></i></InputGroupText>
-                        </InputGroupAddon>
-                        <Input
-                          type="text"
-                          name="email"
-                          onChange={(event) => this.handleChange(event)}
-                          placeholder="Email"
-                          autoComplete="email" />
-                      </InputGroup>
-                      <InputGroup className="mb-3">
-                        <InputGroupAddon addonType="prepend">
-                          <InputGroupText>
-                            <i className="fas fa-key"></i>
-                          </InputGroupText>
-                        </InputGroupAddon>
-                        <Input
-                          type="password"
-                          name="password"
-                          onChange={(event) => this.handleChange(event)}
-                          placeholder="Password"
-                          autoComplete="new-password" />
-                      </InputGroup>
-                      <InputGroup className="mb-4">
-                        <InputGroupAddon addonType="prepend">
-                          <InputGroupText>
-                            <i className="fas fa-phone"></i>
-                          </InputGroupText>
-                        </InputGroupAddon>
-                        <Input
-                          type="text"
-                          name="phone"
-                          onChange={(event) => this.handleChange(event)}
-                          placeholder="Phone Number"
-                          autoComplete="phone" />
-                      </InputGroup>
-                      <Button style={{ marginBottom: '10px' }} onClick={() => this.createUser()} color="success" block>Create Account</Button>
-                      <Link to="/">
-                        <Button onClick={() => this.createUser()} color="secondary" block>Login</Button>
-                      </Link>
-                    </Form>
-                    <p style={{ color: 'red', marginTop: '10px' }} className="text-muted-red">{this.state.errorMessage && this.state.errorMessage}</p>
-                  </CardBody>
-                </Card>
-              </Col>
-            </Row>
-          </Container>
+    const {loading} = this.state
+    let spinner = <Spinner style={{ width: '100px', height: '100px', marginTop: '10%' }} />
+    if (loading) {
+      return spinner
+    } else {
+      return (
+        <div className="signupContainer">
+          <div className="app flex-row align-items-center">
+            <Container>
+              <Row className="justify-content-center">
+                <Col md="9" lg="7" xl="6">
+                  <Card className="mx-4">
+                    <CardBody className="p-4">
+                      <Form>
+                        <h1>Register</h1>
+                        <p className="text-muted">Create your account</p>
+                        <InputGroup className="mb-3">
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText>
+                              <i className="fas fa-user"></i>
+                            </InputGroupText>
+                          </InputGroupAddon>
+                          <Input
+                            name="name"
+                            onChange={(event) => this.handleChange(event)}
+                            type="text"
+                            placeholder="Username"
+                            autoComplete="username" />
+                        </InputGroup>
+                        <InputGroup className="mb-3">
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText><i className="fas fa-envelope-square"></i></InputGroupText>
+                          </InputGroupAddon>
+                          <Input
+                            type="text"
+                            name="email"
+                            onChange={(event) => this.handleChange(event)}
+                            placeholder="Email"
+                            autoComplete="email" />
+                        </InputGroup>
+                        <InputGroup className="mb-3">
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText>
+                              <i className="fas fa-key"></i>
+                            </InputGroupText>
+                          </InputGroupAddon>
+                          <Input
+                            type="password"
+                            name="password"
+                            onChange={(event) => this.handleChange(event)}
+                            placeholder="Password"
+                            autoComplete="new-password" />
+                        </InputGroup>
+                        <InputGroup className="mb-4">
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText>
+                              <i className="fas fa-phone"></i>
+                            </InputGroupText>
+                          </InputGroupAddon>
+                          <Input
+                            type="text"
+                            name="phone"
+                            onChange={(event) => this.handleChange(event)}
+                            placeholder="Phone Number"
+                            autoComplete="phone" />
+                        </InputGroup>
+                        <Button style={{ marginBottom: '10px' }} onClick={() => this.createUser()} color="success" block>Create Account</Button>
+                        <Link to="/">
+                          <Button onClick={() => this.createUser()} color="secondary" block>Login</Button>
+                        </Link>
+                      </Form>
+                      <p style={{ color: 'red', marginTop: '10px' }} className="text-muted-red">{this.state.errorMessage && this.state.errorMessage}</p>
+                    </CardBody>
+                  </Card>
+                </Col>
+              </Row>
+            </Container>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 }
 
